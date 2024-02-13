@@ -9,4 +9,8 @@ public class TestController {
     public String test(){
         return "test code 입니당";
     }
+    @GetMapping("/hello")
+    public String hello(){
+        return "안뇽 반가웡";
+    }
 }
