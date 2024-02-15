@@ -78,21 +78,30 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    # - name: Download artifact
-    #   uses: actions/download-artifact@v2
-    #   with:
-    #     name: cicdsample
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.5.4
+    - name: Copy jar file to remote
+      uses: appleboy/scp-action@master
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Add remote server to known hosts
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-    - name: SCP transfer
-      run: scp *.jar ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:~/cicd
-    - name: Execute remote commands
-      run: |
-        ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo fuser -k 8080/tcp || true"
-          ssh -v ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} "sudo nohup /home/shane/.sdkman/candidates/java/current/bin/java -jar ~/cicd/*.jar  > ~/cicd/nohup.log 2>&1 &"
+        username: ec2-user
+        host: 22
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "./build/libs/*.jar"
+        target: "/home/ec2-user/cicd"
+        strip_components: 2
+    - name: Copy deploy script file to remote
+      uses: appleboy/scp-action@master
+      with:
+        username: ec2-user
+        host: 22
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: "deploy.sh"
+        target: "/home/ec2-user/cicd"
+    - name: Execute deploy script
+      uses: appleboy/ssh-action@master
+      with:
+        username: ec2-user
+        host: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script_stop: true
+        script: |
+          chmod +x /home/ec2-user/cicd/deploy.sh
+          sh /home/ec2-user/cicd/deploy.sh
