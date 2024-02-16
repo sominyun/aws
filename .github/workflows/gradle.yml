@@ -70,8 +70,9 @@ jobs:
         key: ${{ secrets.PRIVATE_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          cat /etc/ssh/sshd_config
+          vim /etc/ssh/sshd_config
           PubkeyAuthentication yes
           PubkeyAcceptedKeyTypes=+ssh-rsa
+          systemctl restart sshd
           whoami
           ls -al
