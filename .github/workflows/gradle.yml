@@ -67,8 +67,10 @@ jobs:
      #도커 빌드 & 이미지 push
       - name: Docker build & Push
         run: |
+          vim mypassword.txt
+          ${{ secrets.DOCKER_PASSWORD }}
           sudo chmod 666 /var/run/docker.sock
-          docker login -u ${{ secrets.DOCKER_ID }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker login -u ${{ secrets.DOCKER_ID }} --password-stdin < ~/my_password
           docker build -f Dockerfile -t ${{ secrets.DOCKER_REPO }}/goorm .
           docker push ${{ secrets.DOCKER_REPO }}/goorm
       #docker-compose 파일을 ec2 서버에 배포
