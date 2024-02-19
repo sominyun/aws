@@ -65,6 +65,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
      #도커 빌드 & 이미지 push
+      - name: Build with Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b55
+        with:
+          arguments: build
       - name: Docker build & Push
         run: |
           sudo chmod 666 /var/run/docker.sock
